@@ -1,23 +1,19 @@
 FROM archlinux/base
 MAINTAINER Marco Guerri
 
-# Notes:
-# CAP_MKNOD seems to be assigned by default, there is no need for
-# additional flags for docker run to get device file creation
-# capabilities. 
-# However, the device file created with mknod will map to
-# a device file on the host if the correct major and minor are
-# provided. The kernel will forbid access unless the device is
-# in the device.allow list of the cgroup (CAP_SYS_ADMIN doesn't
-# seem to be enough?) Furthermore, upon partition rescanning, the 
-# additional device files will not be visible inside the 
-# container (mknod would not work for the reason above?)
+# Running this container:
+# sudo docker run --security-opt apparmor:unconfined --device-cgroup-rule="b 7:* rmw" --cap-add SYS_ADMIN --user root -ti helios4
 
-# The only way I could make this work was by run 
-# the container in --privileged mode with -v /dev:/dev
+# Requirements:
+# * CAP_MKNOD to run mknod for loop device, assigned by default
+# (note that the device created will be visible to the host).
+# --partscan will not work automatically in the container
+# (hence losetup with the offset pointing to the partition directly)
+# * "b 7:99 rmw" in devices.allow to run ioctl LOOP_SET_FD
+# * CAP_SYS_ADMIN to run mount
+# * Relax seccomp profile to be able to mount rw (TODO: do more 
+# fine grained tuning of the profile).
 
-# Requires also
-# sudo mount binfmt_misc -t binfmt_misc /proc/sys/fs/binfmt_misc
 
 RUN useradd -m helios4
 
