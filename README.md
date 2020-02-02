@@ -9,12 +9,20 @@ Docker daemon must be running and the system must support loop devices.
 # Usage
 The main entry point is `run.sh`, which supports 3 commands:
 
-* `./run.sh build`: builds the Docker container images
-* `./run.sh run`: builds the Helios4 image using the Docker image produced
+* `sudo ./run.sh build`: builds the Docker container images
+* `sudo ./run.sh run`: builds the Helios4 image using the Docker image produced
 by `build` command. It supports also running an interactive shell
 within the build environment
-* `./run.sh all`: run both `build` and `run`
+* `sudo ./run.sh all`: run both `build` and `run`
 
-Once the image for the board has been built, it will be available under
-/home/helios4 in the container. You can also re-run the container in 
+
+> **Warning:** `run.sh` requires superuser permissions as it assumes the docker 
+daemon is running as root. The large majority of the logic is executed in the container,
+so it should be fairly easy to review `run.sh` and decide if you are happy to run it as
+root. Do so at your own risk. The container itself needs to run in the host user namespace 
+as it requires privileges to mount loop devices and `binfmt_misc` filesystem 
+(it would not be possible with `userns-remap`). 
+
+Once the image for the board has been built, it will be available as an `.img` file under
+`/home/helios4` in the container. You can also re-run the container in 
 interactive mode (`./run.sh run`) to manually inspect or grab the image.

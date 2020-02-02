@@ -9,8 +9,7 @@ fail () {
 
 
 if [ "$(id -u)" != 0 ]; then
-  echo "This script requires sudo privileges, re-running with sudo..."
-  exec sudo "$0" "$@"
+  fail "This script requires sudo privileges, please re-run with sudo"
 fi
 
 # Make sure that we have the expected number of arguments
@@ -26,7 +25,7 @@ if [ "$1" = "build" ] || [ "$1" = "all" ] ; then
   echo "Stopping and removing already existing containers..."
   ( 
     docker stop c_helios4 && docker rm c_helios4  > /dev/null 2>&1
-  )
+  ) || true
   echo "Building container..."
   docker build --build-arg CACHE_DATE="$(date)" --cpuset-cpus 0-3 -t helios4 . || exit 1
 fi
@@ -47,6 +46,9 @@ if [ "$1" = "run" ] || [ "$1" = "all" ]; then
     docker stop c_helios4
     docker start -ai c_helios4 
   else
+    if ! docker image inspect helios4 > /dev/null 2>&1; then 
+      fail "helios4 Docker image does not exist, please run build"
+    fi
     echo "Creating container..."
     docker run \
       --cap-drop MKNOD \
