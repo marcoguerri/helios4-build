@@ -61,10 +61,14 @@ if [ "$1" = "run" ] || [ "$1" = "all" ]; then
       /home/helios4/build.sh
   fi
 
-  (
-    losetup -d /dev/loop"${devno_dev}" 2> /dev/null
-    losetup -d /dev/loop"${devno_part}" 2> /dev/null
-  )
+  for ld in "${devno_dev}" "${devno_part}"; do
+    if losetup /dev/loop"${ld}" 2> /dev/null; then
+      if ! losetup -d /dev/loop"${ld}" 2> /dev/null; then
+        echo "Could not unmount /dev/loop${ld}! Loop device will leak!";
+      fi
+    fi
+  done
+
 
   # Notes:
   # This container needs to have a loop device available and needs
