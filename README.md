@@ -20,7 +20,7 @@ within the build environment
 daemon is running as root. The large majority of the logic is executed in the container,
 so it should be fairly easy to review `run.sh` and decide if you are happy to run it as
 root. Do so at your own risk. The container itself needs to run in the host user namespace 
-as it requires privileges to mount loop devices and `binfmt_misc` filesystem 
+with `CAP_SYS_ADMIN` as it requires privileges to mount loop devices and `binfmt_misc` filesystem 
 (it would not be possible with `userns-remap`). 
 
 Once the image for the board has been built, it will be available as an `.img` file under
