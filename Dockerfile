@@ -56,8 +56,10 @@ RUN cd $HOME &&  \
 
 ARG CACHE_DATE=init
 
-COPY --chown=helios4:helios4 alarm-helios4-image-builder/build-archlinux-img-for-helios4.sh /home/helios4
+WORKDIR /home/helios4
 
-COPY --chown=helios4:helios4 scripts/build.sh /home/helios4
+COPY --chown=helios4:helios4 build-image.sh .
+COPY --chown=helios4:helios4 scripts/build.sh .
+COPY --chown=helios4:helios4 files .
 
-RUN chmod u+x /home/helios4/build.sh
+RUN chmod u+x build.sh

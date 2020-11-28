@@ -5,7 +5,7 @@ build() {
   cd /home/helios4
   [ "$(id -u)" -eq 0 ] || ( echo "Script should run as root" && exit 1 )
   findmnt /proc/sys/fs/binfmt_misc || mount binfmt_misc -t binfmt_misc /proc/sys/fs/binfmt_misc
-  if /home/helios4/build-archlinux-img-for-helios4.sh; then
+  if /home/helios4/build-image.sh; then
     img_file=$(find /home/helios4 -name 'ArchLinuxARM-helios4*')
     echo "The image is ready! Check out ${img_file}"
     /bin/bash

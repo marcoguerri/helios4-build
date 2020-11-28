@@ -6,6 +6,8 @@
 # Repository: https://github.com/gbcreation/linux-helios4
 # License: MIT
 #
+# Adapted by Marco Guerri for https://github.com/marcoguerri/helios4-build
+#
 
 set -eu
 
@@ -16,21 +18,25 @@ IMG_DIR=`readlink -f "${IMG_DIR}"`
 IMG_FILE="ArchLinuxARM-helios4-$(date +%Y-%m-%d).img"
 IMG_SIZE="4G"
 MOUNT_DIR="./img"
+
 ALARM_ROOTFS="http://os.archlinuxarm.org/os/ArchLinuxARM-armv7-latest.tar.gz"
+ALARM_SIG="http://de3.mirror.archlinuxarm.org/os/ArchLinuxARM-armv7-latest.tar.gz.sig"
+GPG_KEY="68B3537F39A313B3E574D06777193F152BDBE6A6"
+
 LINUX_HELIOS4_VERSION=`wget -q -O - https://api.github.com/repos/gbcreation/linux-helios4/releases/latest | sed -En '/tag_name/{s/.*"([^"]+)".*/\1/;p}'`
 
-sources=("${ALARM_ROOTFS}"
-        'https://raw.githubusercontent.com/armbian/build/master/packages/bsp/helios4/90-helios4-hwmon.rules'
-        'https://raw.githubusercontent.com/armbian/build/master/packages/bsp/helios4/fancontrol_pwm-fan.conf'
-        'https://raw.githubusercontent.com/armbian/build/master/packages/bsp/helios4/mdadm-fault-led.sh'
-        'https://raw.githubusercontent.com/armbian/build/master/packages/bsp/helios4/helios4-wol.service'
-        "https://github.com/gbcreation/linux-helios4/releases/download/${LINUX_HELIOS4_VERSION}/linux-helios4-${LINUX_HELIOS4_VERSION}-armv7h.pkg.tar.xz")
-md5sums=('3b427121afaa285a9353496f79fb4e17'
+sources=(
+        'https://raw.githubusercontent.com/armbian/build/master/packages/bsp/mvebu/helios4/90-helios4-hwmon.rules'
+        'https://raw.githubusercontent.com/armbian/build/master/packages/bsp/mvebu/helios4/fancontrol_pwm-fan.conf'
+        'https://raw.githubusercontent.com/armbian/build/master/packages/bsp/mvebu/helios4/mdadm-fault-led.sh'
+        'https://raw.githubusercontent.com/armbian/build/master/packages/bsp/mvebu/helios4/helios4-wol.service'
+)
+md5sums=(
          'c25794873ebcd50405c591a09efa0aaa'
          '74ed6f4e0b3df9e8cad471b3d1e2cce0'
          '0a5bfbea2f1d65b936da6df4085ee5f2'
          '4b37a9a91b69695747ef2c6b0d01fa98'
-         `wget -q -O - https://github.com/gbcreation/linux-helios4/releases/download/${LINUX_HELIOS4_VERSION}/md5sums.txt | sed -En "/linux-helios4-${LINUX_HELIOS4_VERSION}/{s/^([0-9a-f]{32}).*$/\1/;p}"`)
+)
 
 echo_step () {
     echo -e "\e[1;32m ${@} \e[0m\n"
@@ -52,6 +58,17 @@ fi
 
 echo_step Install script dependencies...
 pacman -Sy --needed --noconfirm arch-install-scripts arm-none-eabi-gcc uboot-tools
+
+echo_step "\nDownloading rootfs"
+
+gpg --keyserver keyserver.ubuntu.com --recv-keys ${GPG_KEY}
+
+echo_step "\nVerifying signature of rootfs"
+
+${DOWNLOADER} "${ALARM_ROOTFS}"
+${DOWNLOADER} "${ALARM_SIG}"
+
+gpg --verify "${ALARM_SIG}"
 
 for i in ${!sources[*]}; do
     echo_step Download ${sources[i]}...
@@ -105,9 +122,6 @@ bsdtar -xpf "${ALARM_ROOTFS##*/}" -C "${MOUNT_DIR}"
 echo_step Copy hwmon to fix device mapping...
 sed -e 's/armada_thermal/f10e4078.thermal/' 90-helios4-hwmon.rules > ${MOUNT_DIR}/etc/udev/rules.d/90-helios4-hwmon.rules
 
-echo_step Copy linux-helios4 packages to ${MOUNT_DIR}/root...
-cp linux-helios4-*-armv7h.pkg.tar.xz ${MOUNT_DIR}/root
-
 echo_step Copy helios4-wol.service to ${MOUNT_DIR}/usr/lib/systemd/system/...
 cp helios4-wol.service ${MOUNT_DIR}/usr/lib/systemd/system/
 
@@ -121,17 +135,12 @@ echo_step Initialize pacman-key, update ARM system and install lm_sensors...
 arch-chroot ${MOUNT_DIR} bash -c "
     pacman-key --init &&
     pacman-key --populate archlinuxarm &&
-    pacman -Syu --noconfirm --ignore linux-armv7 &&
-    (yes | pacman -R linux-armv7 ) &&
-    (yes | pacman -U /root/linux-helios4-${LINUX_HELIOS4_VERSION}-armv7h.pkg.tar.xz) &&
+    pacman -Syu --noconfirm &&
     pacman -S --noconfirm lm_sensors ethtool &&
     systemctl enable fancontrol.service &&
     systemctl --no-reload enable helios4-wol.service &&
     echo helios4 > /etc/hostname
 "
-
-echo_step Remove linux-helios4 packages to ${MOUNT_DIR}/root...
-rm -f ${MOUNT_DIR}/root/linux-helios4-*-armv7h.pkg.tar.xz
 
 echo_step Remove qemu-arm-static from ${MOUNT_DIR}/usr/bin...
 rm -f ${MOUNT_DIR}/usr/bin/qemu-arm-static
@@ -165,7 +174,7 @@ sync
 umount "${MOUNT_DIR}"
 
 echo_step Build U-Boot...
-[ ! -d "u-boot" ] && git clone --depth=1 https://github.com/helios-4/u-boot.git -b helios4
+[ ! -d "u-boot" ] && git clone --depth=1 https://github.com/helios-4/u-boot.git -b helios4 && (cd u-boot && patch -p1 < ../0001-Fix-build-gcc-10.patch)
 cd u-boot
 [ ! -f u-boot-spl.kwb ] && {
     export ARCH=arm
