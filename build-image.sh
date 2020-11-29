@@ -20,7 +20,8 @@ IMG_SIZE="4G"
 MOUNT_DIR="./img"
 
 ALARM_ROOTFS="http://os.archlinuxarm.org/os/ArchLinuxARM-armv7-latest.tar.gz"
-ALARM_SIG="http://de3.mirror.archlinuxarm.org/os/ArchLinuxARM-armv7-latest.tar.gz.sig"
+SIG_FILE="ArchLinuxARM-armv7-latest.tar.gz.sig"
+ALARM_SIG="http://os.archlinuxarm.org/os/${SIG_FILE}"
 GPG_KEY="68B3537F39A313B3E574D06777193F152BDBE6A6"
 
 LINUX_HELIOS4_VERSION=`wget -q -O - https://api.github.com/repos/gbcreation/linux-helios4/releases/latest | sed -En '/tag_name/{s/.*"([^"]+)".*/\1/;p}'`
@@ -68,7 +69,7 @@ echo_step "\nVerifying signature of rootfs"
 ${DOWNLOADER} "${ALARM_ROOTFS}"
 ${DOWNLOADER} "${ALARM_SIG}"
 
-gpg --verify "${ALARM_SIG}"
+gpg --verify "${SIG_FILE}"
 
 for i in ${!sources[*]}; do
     echo_step Download ${sources[i]}...

@@ -1,25 +1,28 @@
 # helios4-build
 
-helios4-build implements an Arch Linux based Docker container which builds an Arch Linux image
-for the Helios4 board. The build logic is based on [Gontran Baerts](https://github.com/gbcreation/alarm-helios4-image-builder) build script with several changes on top:
+helios4-build is an Arch Linux Docker container which builds an Arch Linux image
+for the Helios4 board. The build logic is based on [Gontran Baerts](https://github.com/gbcreation/alarm-helios4-image-builder) script with several changes on top:
 
-* Loop devices are exposed into the container directly from the underlying host
+* The build happens entirely in the container, loop devices are exposed directly from the underlying host
 * The upstream Arch Linux ARM kernel is used (linux-armv7). This means that some of
 the custom patches that the [original build script would include](https://github.com/gbcreation/alarm-helios4-image-builder)
 are not supported anymore, as they have not been upstreamed yet (kernel version at the
 time of writing is 5.8.2). The patches are the following:
-  * [91-01-libata-add-ledtrig-support.patch](https://raw.githubusercontent.com/armbian/build/master/patch/kernel/mvebu-next/91-01-libata-add-ledtrig-support.patch): adds support for disk activity LED
-  * [91-02-Enable-ATA-port-LED-trigger.patch](https://raw.githubusercontent.com/armbian/build/master/patch/kernel/mvebu-next/91-02-Enable-ATA-port-LED-trigger.patch): adds support for disk activity LED
-  * [92-mvebu-gpio-remove-hardcoded-timer-assignment.patch](https://raw.githubusercontent.com/armbian/build/master/patch/kernel/mvebu-next/2-mvebu-gpio-remove-hardcoded-timer-assignment.patch): in-kernel support for second fan
-  * [92-mvebu-gpio-add_wake_on_gpio_support.patch](https://raw.githubusercontent.com/armbian/build/master/patch/kernel/mvebu-next/92-mvebu-gpio-add_wake_on_gpio_support.patch): supports for Wake-On-Lan
-  * [94-helios4-dts-add-wake-on-lan-support.patch](https://raw.githubusercontent.com/armbian/build/master/patch/kernel/mvebu-next/94-helios4-dts-add-wake-on-lan-support.patch): device tree changes to support Wake-On-Lan
+  * [91-01-libata-add-ledtrig-support.patch](https://raw.githubusercontent.com/armbian/build/master/patch/kernel/mvebu-current/91-01-libata-add-ledtrig-support.patch): adds support for disk activity LEDs
+  * [91-02-Enable-ATA-port-LED-trigger.patch](
+https://raw.githubusercontent.com/armbian/build/master/patch/kernel/mvebu-current/91-02-Enable-ATA-port-LED-trigger.patch): enables support for disk activity LEDs via `ARCH_WANT_LIBATA_LEDS`
+  * [92-mvebu-gpio-remove-hardcoded-timer-assignment.patch](https://raw.githubusercontent.com/armbian/build/master/patch/kernel/mvebu-current/92-mvebu-gpio-remove-hardcoded-timer-assignment.patch): in-kernel support for second fan
+  * [92-mvebu-gpio-add_wake_on_gpio_support.patch](https://raw.githubusercontent.com/armbian/build/master/patch/kernel/mvebu-current/92-mvebu-gpio-add_wake_on_gpio_support.patch): supports for Wake-On-Lan
+  * [94-helios4-dts-add-wake-on-lan-support.patch](https://raw.githubusercontent.com/armbian/build/master/patch/kernel/mvebu-current/94-helios4-dts-add-wake-on-lan-support.patch): device tree changes to support Wake-On-Lan
+
+Note that armbian is maintaining even more [kernel patches](https://github.com/armbian/build/tree/master/patch/kernel/mvebu-current) for Marvell Boards, some of which do apply to helios4 (and are not part of the list above). So, additional funcionalities might not be available.
 
 # Requirements
 Docker daemon must be running and the system must support loop devices.
 
 # Usage
-The main entry point is `run.sh <COMMAND>`, which should be invoked with root privileges. Supported commands
-are the following:
+The main entry point is `run.sh`, which requires a command as argument. It should be invoked with root privileges. 
+Supported commands are the following:
 
 * `build`: builds the Docker image
 * `run`: builds the Helios4 image using the Docker image produced
