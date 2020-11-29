@@ -11,11 +11,14 @@ time of writing is 5.8.2). The patches are the following:
   * [91-01-libata-add-ledtrig-support.patch](https://raw.githubusercontent.com/armbian/build/master/patch/kernel/mvebu-current/91-01-libata-add-ledtrig-support.patch): adds support for disk activity LEDs
   * [91-02-Enable-ATA-port-LED-trigger.patch](
 https://raw.githubusercontent.com/armbian/build/master/patch/kernel/mvebu-current/91-02-Enable-ATA-port-LED-trigger.patch): enables support for disk activity LEDs via `ARCH_WANT_LIBATA_LEDS`
-  * [92-mvebu-gpio-remove-hardcoded-timer-assignment.patch](https://raw.githubusercontent.com/armbian/build/master/patch/kernel/mvebu-current/92-mvebu-gpio-remove-hardcoded-timer-assignment.patch): in-kernel support for second fan
+  * [92-mvebu-gpio-remove-hardcoded-timer-assignment.patch](https://raw.githubusercontent.com/armbian/build/master/patch/kernel/mvebu-current/92-mvebu-gpio-remove-hardcoded-timer-assignment.patch): in-kernel support for second fan. *This means that PWM control for second fan will not work (i.e. `/dev/fan-j17/pwm1` will not be present), and `/etc/fancontrol` has been configured accordingly. The board will be loud.*
   * [92-mvebu-gpio-add_wake_on_gpio_support.patch](https://raw.githubusercontent.com/armbian/build/master/patch/kernel/mvebu-current/92-mvebu-gpio-add_wake_on_gpio_support.patch): supports for Wake-On-Lan
   * [94-helios4-dts-add-wake-on-lan-support.patch](https://raw.githubusercontent.com/armbian/build/master/patch/kernel/mvebu-current/94-helios4-dts-add-wake-on-lan-support.patch): device tree changes to support Wake-On-Lan
 
 Note that armbian is maintaining even more [kernel patches](https://github.com/armbian/build/tree/master/patch/kernel/mvebu-current) for Marvell Boards, some of which do apply to helios4 (and are not part of the list above). So, additional funcionalities might not be available.
+
+# Why build an image with partial support for the board?
+I use helios4 in a way that I can afford lack of the functionalities above, while I maintain complete tracking of upstream rolling releases cycles, which I do care a lot about.
 
 # Requirements
 Docker daemon must be running and the system must support loop devices.

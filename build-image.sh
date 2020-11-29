@@ -28,13 +28,11 @@ LINUX_HELIOS4_VERSION=`wget -q -O - https://api.github.com/repos/gbcreation/linu
 
 sources=(
         'https://raw.githubusercontent.com/armbian/build/master/packages/bsp/mvebu/helios4/90-helios4-hwmon.rules'
-        'https://raw.githubusercontent.com/armbian/build/master/packages/bsp/mvebu/helios4/fancontrol_pwm-fan.conf'
         'https://raw.githubusercontent.com/armbian/build/master/packages/bsp/mvebu/helios4/mdadm-fault-led.sh'
         'https://raw.githubusercontent.com/armbian/build/master/packages/bsp/mvebu/helios4/helios4-wol.service'
 )
 md5sums=(
          'c25794873ebcd50405c591a09efa0aaa'
-         '74ed6f4e0b3df9e8cad471b3d1e2cce0'
          '0a5bfbea2f1d65b936da6df4085ee5f2'
          '4b37a9a91b69695747ef2c6b0d01fa98'
 )
