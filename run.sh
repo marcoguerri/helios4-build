@@ -35,6 +35,9 @@ if [ "$1" = "run" ] || [ "$1" = "all" ]; then
   devno_dev=$(losetup -f | tr -c -d "[:digit:]")
   devno_part=$((devno_dev+1))
 
+  [ ! -e /dev/loop${devno_dev} ] && fail "/dev/loop${devno_dev} does not exist"
+  [ ! -e /dev/loop${devno_part} ] && fail "/dev/loop${devno_part} does not exist"
+
   losetup /dev/loop${devno_part} > /dev/null 2>&1 && \
     fail "/dev/loop${devno_part} is not available, " \
          "two consecutive loop devices are necessary"
