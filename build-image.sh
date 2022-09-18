@@ -33,7 +33,7 @@ sources=(
 )
 md5sums=(
          'c25794873ebcd50405c591a09efa0aaa'
-         '0a5bfbea2f1d65b936da6df4085ee5f2'
+         'f8ba1994cfd5af8e546dda12308da41d'
          '4b37a9a91b69695747ef2c6b0d01fa98'
 )
 
@@ -128,7 +128,7 @@ echo_step Copy `which qemu-arm-static` to ${MOUNT_DIR}/usr/bin...
 cp `which qemu-arm-static` ${MOUNT_DIR}/usr/bin
 
 echo_step Register qemu-arm-static as ARM interpreter in the kernel...
-[ ! -f /proc/sys/fs/binfmt_misc/register ] && echo ':arm:M::\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-arm-static:CF' > /proc/sys/fs/binfmt_misc/register
+[ ! -f /proc/sys/fs/binfmt_misc/arm ] && echo ':arm:M::\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-arm-static:CF' > /proc/sys/fs/binfmt_misc/register
 
 echo_step Initialize pacman-key, update ARM system and install lm_sensors...
 arch-chroot ${MOUNT_DIR} bash -c "

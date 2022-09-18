@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eu
+set -euo pipefail
 
 fail () {
   echo "$@";
@@ -32,8 +32,20 @@ fi
 
 if [ "$1" = "run" ] || [ "$1" = "all" ]; then
 
+  # TODO: Improve with better cleanup
   devno_dev=$(losetup -f | tr -c -d "[:digit:]")
-  devno_part=$((devno_dev+1))
+  tmpblk=$(mktemp)
+  dd if=/dev/zero of=/tmp/block bs=1 count=1024
+  losetup /dev/loop${devno_dev} ${tmpblk}
+
+  devno_part=$(losetup -f | tr -c -d "[:digit:]")
+  losetup -d /dev/loop${devno_dev}
+
+  rm ${tmpblk}
+
+
+  [ ! -e /dev/loop${devno_dev} ] && fail "/dev/loop${devno_dev} does not exist"
+  [ ! -e /dev/loop${devno_part} ] && fail "/dev/loop${devno_part} does not exist"
 
   [ ! -e /dev/loop${devno_dev} ] && fail "/dev/loop${devno_dev} does not exist"
   [ ! -e /dev/loop${devno_part} ] && fail "/dev/loop${devno_part} does not exist"

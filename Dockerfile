@@ -1,7 +1,11 @@
-FROM archlinux/base
+FROM archlinux
 MAINTAINER Marco Guerri
 
 RUN useradd -m helios4
+
+RUN pacman-key --init
+RUN pacman-key --populate archlinux
+RUN pacman -Sy --noconfirm archlinux-keyring
 
 RUN pacman -Syu --noconfirm \
 	bc \
@@ -29,7 +33,8 @@ RUN pacman -Syu --noconfirm \
 	diffutils \
 	which \
 	aria2 \
-	gettext
+	gettext \
+	qemu-user-static
 
 RUN cat /proc/sys/kernel/random/uuid  | sed 's/-//g' > /etc/machine-id
 
@@ -38,21 +43,6 @@ RUN echo "helios4 ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 RUN sed 's/.*MAKEFLAGS.*/MAKEFLAGS="-j4"/' -i /etc/makepkg.conf 
 
 USER helios4
-
-RUN cd $HOME &&  \
-	git clone https://aur.archlinux.org/pcre-static.git &&  \
-	cd pcre-static &&  \
-	makepkg -i --skippgpcheck --noconfirm || true
-
-RUN cd $HOME &&  \
-	git clone https://aur.archlinux.org/glib2-static.git && \
-	cd glib2-static &&  \
-	makepkg -i --skippgpcheck --noconfirm ||  true 
-
-RUN cd $HOME &&  \
-	git clone https://aur.archlinux.org/qemu-user-static.git && \
-	cd qemu-user-static &&  \
-	makepkg -i --skippgpcheck --noconfirm ||  true 
 
 ARG CACHE_DATE=init
 
